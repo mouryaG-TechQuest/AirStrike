@@ -1,0 +1,13 @@
+{
+    "name": "sky-defender-3d",
+    "version": "1.0.0",
+    "description": "3D Sky Defender - Hand gesture controlled shooting game",
+    "main": "services/server.js",
+    "scripts": {
+        "start": "node services/server.js",
+        "dev": "node services/server.js"
+    },
+    "keywords": ["game", "3d", "hand-tracking", "mediapipe"],
+    "author": "",
+    "license": "MIT"
+}

@@ -1,0 +1,27 @@
+# Netlify deployment config
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Permissions-Policy = "camera=(self), xr-spatial-tracking=(self)"
+
+# Redirect root to frontend
+[[redirects]]
+  from = "/"
+  to = "/frontend/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/index.html"
+  to = "/frontend/index.html"
+  status = 200
+
+# VR routes
+[[redirects]]
+  from = "/vr"
+  to = "/vr/index.html"
+  status = 200

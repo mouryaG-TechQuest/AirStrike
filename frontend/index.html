@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0ff">
+    <meta name="description" content="3D Sky Defender - Hand gesture controlled shooting game">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- Security -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <link rel="manifest" href="manifest.json">
+    <title>3D Sky Defender</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <video id="videoFeed" autoplay muted playsinline></video>
+    
+    <div id="hud">
+        <div class="hud-item">🎯 Score: <span id="scoreVal">0</span></div>
+        <div class="hud-item">❤️ Lives: <span id="livesVal">5</span></div>
+        <div class="hud-item">🔥 Combo: <span id="comboVal">x1</span></div>
+        <div class="hud-item">⚡ Speed: <span id="speedVal">0.2x</span></div>
+        <div class="hud-item" id="handInfo">🖐️ Waiting...</div>
+    </div>
+    
+    <div id="menuPanel">
+        <button class="menu-btn pause-btn-large" onclick="game.togglePause()">⏸️ PAUSE</button>
+        <button class="menu-btn" onclick="game.restart()">🔄 Restart</button>
+        <button class="menu-btn" onclick="game.showLeaderboard()">🏆 Scores</button>
+        <button class="menu-btn" onclick="game.quit()">❌ Quit</button>
+    </div>
+    
+    <div id="startScreen"></div>
+    <div id="pauseMenu"></div>
+    <div id="scoreboardModal"></div>
+    <div id="gameOverScreen"></div>
+
+    <!-- External Dependencies - Load first -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js" crossorigin="anonymous"></script>
+    
+    <!-- Game Engine - Load after dependencies -->
+    <script src="js/game3d.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(console.log);
+        }
+        
+        // Debug: Check if dependencies loaded
+        window.addEventListener('load', () => {
+            console.log('Hands loaded:', typeof Hands !== 'undefined');
+            console.log('Camera loaded:', typeof Camera !== 'undefined');
+        });
+    </script>
+</body>
+</html>

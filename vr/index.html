@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#00bcd4">
+    <meta name="description" content="3D VR shooting game for Meta Quest and Apple Vision Pro">
+    <title>Sky Defender VR - Meta Quest & Apple Vision Pro</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- WebXR Polyfill for broader compatibility -->
+    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
+    
+    <!-- Three.js for 3D rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/webxr/VRButton.js"></script>
+    
+    <!-- Register Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+        }
+    </script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #000; 
+            overflow: hidden; 
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: white;
+        }
+        #info {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 1px solid #0ff;
+            text-align: center;
+            z-index: 100;
+        }
+        #info h1 { color: #0ff; font-size: 24px; margin-bottom: 10px; }
+        #info p { color: #aaa; font-size: 14px; margin: 5px 0; }
+        #hud {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #0ff;
+            z-index: 100;
+            display: none;
+        }
+        #hud div { margin: 5px 0; color: #0ff; }
+        #hud span { color: white; font-weight: bold; }
+        .vr-button {
+            position: fixed !important;
+            bottom: 30px !important;
+        }
+        #startBtn {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 40px;
+            font-size: 20px;
+            background: linear-gradient(45deg, #00bcd4, #0097a7);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            z-index: 100;
+        }
+        #startBtn:hover { filter: brightness(1.2); }
+        #compatibility {
+            position: fixed;
+            bottom: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,100,0,0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #0f0;
+            z-index: 100;
+        }
+        #compatibility.warning { background: rgba(100,100,0,0.3); border-color: #ff0; }
+        #compatibility.error { background: rgba(100,0,0,0.3); border-color: #f00; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h1>🎮 SKY DEFENDER VR</h1>
+        <p>Compatible with Meta Quest & Apple Vision Pro</p>
+        <p>Use controllers or hand tracking to aim and shoot!</p>
+    </div>
+    
+    <div id="compatibility">Checking VR compatibility...</div>
+    
+    <button id="startBtn" style="display:none;">▶️ START GAME (Non-VR)</button>
+    
+    <div id="hud">
+        <div>Score: <span id="scoreVal">0</span></div>
+        <div>Lives: <span id="livesVal">5</span></div>
+        <div>Combo: <span id="comboVal">x1</span></div>
+    </div>
+
+    <script src="js/vr-game.js"></script>
+</body>
+</html>

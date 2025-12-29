@@ -1,0 +1,87 @@
+/* 3D Sky Defender - Styles */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { 
+    overflow: hidden; 
+    background: #000; 
+    font-family: 'Segoe UI', Arial, sans-serif;
+    touch-action: none;
+    height: 100%;
+}
+
+#gameCanvas { 
+    display: block;
+    image-rendering: optimizeSpeed;
+}
+
+#videoFeed {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 180px;
+    height: 135px;
+    border: 2px solid rgba(0,255,255,0.5);
+    border-radius: 10px;
+    transform: scaleX(-1);
+    z-index: 100;
+    background: #111;
+}
+
+#hud {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    color: #0ff;
+    font-size: 16px;
+    z-index: 100;
+    text-shadow: 0 0 10px #0ff;
+    pointer-events: none;
+}
+
+.hud-item { 
+    margin: 8px 0; 
+    padding: 6px 12px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 6px;
+    border-left: 3px solid #0ff;
+}
+
+#menuPanel {
+    position: absolute;
+    top: 15px;
+    right: 210px;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+}
+
+.menu-btn {
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.7);
+    border: 2px solid #0ff;
+    border-radius: 8px;
+    color: #0ff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.1s, filter 0.1s;
+}
+
+.menu-btn:hover {
+    background: rgba(0,255,255,0.15);
+}
+
+.pause-btn-large {
+    background: rgba(255,100,0,0.85) !important;
+    border-color: #ff6600 !important;
+    color: white !important;
+    font-size: 16px !important;
+    padding: 12px 20px !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #videoFeed { width: 120px; height: 90px; }
+    #menuPanel { right: 140px; flex-wrap: wrap; }
+    .menu-btn { padding: 8px 10px; font-size: 12px; }
+    .hud-item { font-size: 14px; padding: 4px 8px; }
+}
