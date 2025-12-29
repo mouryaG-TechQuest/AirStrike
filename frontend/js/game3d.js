@@ -222,17 +222,17 @@ class SkyDefender3D {
         const existing = document.getElementById('cameraToggle');
         if (existing) existing.remove();
         
-        // Create camera toggle button
+        // Create camera ON/OFF toggle button
         const toggleBtn = document.createElement('button');
         toggleBtn.id = 'cameraToggle';
-        toggleBtn.innerHTML = '🔄 Switch Camera';
+        toggleBtn.innerHTML = '📷 Camera ON';
         toggleBtn.style.cssText = `
             position: fixed;
             bottom: 80px;
             left: 20px;
             padding: 10px 15px;
             font-size: 14px;
-            background: rgba(0, 188, 212, 0.8);
+            background: rgba(76, 175, 80, 0.9);
             border: none;
             border-radius: 8px;
             color: white;
@@ -240,7 +240,7 @@ class SkyDefender3D {
             z-index: 1000;
             backdrop-filter: blur(5px);
         `;
-        toggleBtn.onclick = () => this.toggleCamera();
+        toggleBtn.onclick = () => this.toggleCameraOnOff();
         document.body.appendChild(toggleBtn);
     }
     
@@ -283,6 +283,28 @@ class SkyDefender3D {
                 }
             `;
             document.head.appendChild(style);
+        }
+    }
+    
+    toggleCameraOnOff() {
+        const toggleBtn = document.getElementById('cameraToggle');
+        
+        if (this.cameraAllowed && this.video.srcObject) {
+            // Turn camera OFF
+            this.video.srcObject.getTracks().forEach(track => track.stop());
+            if (this.camera) this.camera.stop();
+            this.video.srcObject = null;
+            this.video.style.display = 'none';
+            this.cameraAllowed = false;
+            this.handDetected = false;
+            
+            toggleBtn.innerHTML = '📷 Camera OFF';
+            toggleBtn.style.background = 'rgba(244, 67, 54, 0.9)';
+            document.getElementById('handInfo').textContent = '🖱️ Mouse Mode';
+        } else {
+            // Turn camera ON
+            toggleBtn.innerHTML = '📷 Starting...';
+            this.requestCameraAccess();
         }
     }
     
