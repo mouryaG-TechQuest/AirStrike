@@ -29,7 +29,9 @@ class SkyDefender3D {
         this.isPointing = false;
         this.indexOpen = false;
         this.lastClickTime = 0;
-        this.cameraAllowed = localStorage.getItem('cameraAllowed') === 'true';
+        this.cameraAllowed = false;
+        this.currentFacingMode = 'user';
+        this.availableCameras = [];
         
         // Game objects
         this.enemies = [];
@@ -118,46 +120,62 @@ class SkyDefender3D {
     }
     
     async initHandTracking() {
+        // Always request camera - don't skip based on cached permission
+        await this.requestCameraAccess();
+    }
+    
+    async requestCameraAccess(facingMode = 'user') {
         try {
+            // Stop existing camera if any
+            if (this.video.srcObject) {
+                this.video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            if (this.camera) {
+                this.camera.stop();
+            }
+            
             // Check if MediaPipe is loaded
             if (typeof Hands === 'undefined') {
                 throw new Error('MediaPipe not loaded');
             }
             
-            this.hands = new Hands({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-            });
-            
-            this.hands.setOptions({
-                maxNumHands: 1,
-                modelComplexity: 0,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
-            });
-            
-            this.hands.onResults((r) => this.processHand(r));
-            
-            // Check if camera was previously allowed
-            const permissionStatus = await navigator.permissions.query({ name: 'camera' }).catch(() => null);
-            
-            if (permissionStatus && permissionStatus.state === 'denied') {
-                throw new Error('Camera permission denied');
+            // Initialize hands if not already done
+            if (!this.hands) {
+                this.hands = new Hands({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+                });
+                
+                this.hands.setOptions({
+                    maxNumHands: 1,
+                    modelComplexity: 0,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+                
+                this.hands.onResults((r) => this.processHand(r));
             }
             
-            // Request camera access
+            // Get available cameras
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            this.availableCameras = devices.filter(d => d.kind === 'videoinput');
+            
+            // Store current facing mode
+            this.currentFacingMode = facingMode;
+            
+            // Request camera access - ALWAYS prompt user
+            document.getElementById('handInfo').textContent = '📷 Requesting camera...';
+            
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { 
                     width: { ideal: 640 }, 
                     height: { ideal: 480 }, 
-                    facingMode: 'user' 
+                    facingMode: facingMode
                 } 
             });
             
-            // Store permission granted
-            localStorage.setItem('cameraAllowed', 'true');
             this.cameraAllowed = true;
-            
             this.video.srcObject = stream;
+            this.video.style.display = 'block';
             
             // Wait for video to be ready
             await new Promise((resolve) => {
@@ -184,14 +202,95 @@ class SkyDefender3D {
             
             this.camera.start();
             document.getElementById('handInfo').textContent = '🖐️ Camera Ready';
-            console.log('✓ Camera and hand tracking initialized');
+            
+            // Show camera toggle button if multiple cameras
+            this.showCameraToggle();
+            
+            console.log('✓ Camera initialized:', facingMode);
             
         } catch (e) {
-            console.log('Camera/Hand tracking error:', e.message);
-            document.getElementById('handInfo').textContent = '🖱️ Mouse Mode';
+            console.log('Camera error:', e.message);
+            document.getElementById('handInfo').textContent = '🖱️ Mouse Mode (Camera denied)';
             this.video.style.display = 'none';
             this.cameraAllowed = false;
+            this.showCameraRetryButton();
         }
+    }
+    
+    showCameraToggle() {
+        // Remove existing toggle if any
+        const existing = document.getElementById('cameraToggle');
+        if (existing) existing.remove();
+        
+        // Create camera toggle button
+        const toggleBtn = document.createElement('button');
+        toggleBtn.id = 'cameraToggle';
+        toggleBtn.innerHTML = '🔄 Switch Camera';
+        toggleBtn.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            padding: 10px 15px;
+            font-size: 14px;
+            background: rgba(0, 188, 212, 0.8);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        `;
+        toggleBtn.onclick = () => this.toggleCamera();
+        document.body.appendChild(toggleBtn);
+    }
+    
+    showCameraRetryButton() {
+        // Remove existing button if any
+        const existing = document.getElementById('cameraRetry');
+        if (existing) existing.remove();
+        
+        const retryBtn = document.createElement('button');
+        retryBtn.id = 'cameraRetry';
+        retryBtn.innerHTML = '📷 Enable Camera';
+        retryBtn.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            padding: 12px 20px;
+            font-size: 14px;
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+        `;
+        retryBtn.onclick = () => {
+            retryBtn.remove();
+            this.requestCameraAccess();
+        };
+        document.body.appendChild(retryBtn);
+        
+        // Add pulse animation
+        if (!document.getElementById('pulseStyle')) {
+            const style = document.createElement('style');
+            style.id = 'pulseStyle';
+            style.textContent = `
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    async toggleCamera() {
+        // Switch between front and back camera
+        const newMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
+        document.getElementById('handInfo').textContent = '🔄 Switching camera...';
+        await this.requestCameraAccess(newMode);
     }
     
     processHand(results) {
